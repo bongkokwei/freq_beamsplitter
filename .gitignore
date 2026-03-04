@@ -24,3 +24,4 @@ htmlcov
 .coverage
 nosetests.xml
 coverage.xml
+figures

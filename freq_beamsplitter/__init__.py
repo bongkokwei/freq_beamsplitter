@@ -36,6 +36,11 @@ from .optimise import (
     InverseDesignResult,
 )
 
+from .embed_unitary import (
+    embed_unitary_2x2,
+    beamsplitter,
+)
+
 __all__ = [
     # core
     "build_K",
@@ -50,7 +55,9 @@ __all__ = [
     "haar_unitary",
     "inverse_design",
     "InverseDesignResult",
+    "embed_unitary_2x2",
+    "beamsplitter",
 ]
 
 __version__ = "0.1.0"
-__author__  = "Kok-Wei"
+__author__ = "Kok-Wei"
