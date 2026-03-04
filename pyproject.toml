@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "freq-beamsplitter"
+version = "0.1.0"
+description = "EO-modulated ring resonator scattering matrix simulator (Buddhiraju et al. 2021)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+
+dependencies = [
+    "numpy>=1.24",
+    "matplotlib>=3.7",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "scipy"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["freq_beamsplitter*"]
