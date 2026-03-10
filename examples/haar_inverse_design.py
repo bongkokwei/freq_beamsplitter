@@ -45,15 +45,18 @@ SEED = 7  # reproducible Haar sample
 
 U_target = haar_unitary(2 * N_sb + 1, seed=SEED)
 
+# 50:50 beamsplitter with phase shift
 # unitary_2x2 = beamsplitter(
 #     theta=np.pi / 4, phi=0.0
-# )  # 50:50 beamsplitter with phase shift
+# )
+
+# embed in single input/output mode
 # U_target = embed_unitary_2x2(
 #     U2=unitary_2x2,
 #     i=0,
 #     j=1,
 #     N=2 * N_sb + 1,
-# )  # embed in single input/output mode
+# )
 
 
 print("=" * 60)
@@ -70,8 +73,8 @@ result = inverse_design(
     N_sb=N_sb,
     N_r=N_r,
     N_f=N_f,
-    gamma_e=0.8,
-    gamma_i=0.1,
+    gamma_e=1,
+    gamma_i=0.8,
     delta_omega_list=0.0,
     n_restarts=5,
     kappa_scale=0.5,
