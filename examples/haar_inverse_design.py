@@ -27,11 +27,7 @@ from freq_beamsplitter import (
     haar_unitary,
     inverse_design,
     cascaded_scattering_matrix,
-    fidelity,
     unitarity_error,
-    plot_matrix_grid,
-    embed_unitary_2x2,
-    beamsplitter,
 )
 
 # ── 1. System parameters ─────────────────────────────────────────────────────
@@ -41,27 +37,35 @@ N_f = 2 * N_sb  # modulation tones per ring
 N_r = N_sb + 2  # rings in cascade
 SEED = 7  # reproducible Haar sample
 
-# ── 2. Draw a Haar-random target unitary ─────────────────────────────────────
+N_f = N_sb
+N_r = 1
 
+# ── 2a. Draw a Haar-random target unitary ─────────────────────────────────────
 U_target = haar_unitary(2 * N_sb + 1, seed=SEED)
 
-# 50:50 beamsplitter with phase shift
-# unitary_2x2 = beamsplitter(
-#     theta=np.pi / 4, phi=0.0
-# )
+# ── 2b. Alternatively, define a specific target unitary by permuting modes ───
+shift_by = 2
+num_modes = 2 * N_sb + 1
+sigma = (np.arange(num_modes) + shift_by) % (num_modes)  # [2, 3, 4, 5, 6, 0, 1]
+U_target = np.eye(2 * N_sb + 1, dtype=complex)[sigma]
 
-# embed in single input/output mode
-# U_target = embed_unitary_2x2(
-#     U2=unitary_2x2,
-#     i=0,
-#     j=1,
-#     N=2 * N_sb + 1,
-# )
+# ── 2c. Or simply target the identity (no transformation) — should be easy to learn! ──
+U_target = np.eye(num_modes, dtype=complex)  # identity (no transformation)
 
+# -- 2d. Single column shift ─────────────────────────────────────────
+input_mode = 0  # physical mode label
+output_mode = +2  # physical mode label
+
+j = input_mode + N_sb  # column index = 3
+i = output_mode + N_sb  # row index = 5
+
+U_target = np.zeros((num_modes, num_modes), dtype=complex)
+U_target[i, j] = 1  # only the (5, 3) entry is set
 
 print("=" * 60)
 print("Haar-random unitary — inverse design demo")
 print("=" * 60)
+print(f"sigma (mode mapping) : {sigma}")
 print(f"\nTarget U  :  {U_target.shape[0]}×{U_target.shape[1]} Haar-random unitary")
 print(f"System    :  N_r={N_r} rings, N_f={N_f} tones/ring, N_sb={N_sb}")
 print(f"Unitarity check on U: {unitarity_error(U_target):.2e}  (expect ~1e-15)\n")
@@ -74,7 +78,7 @@ result = inverse_design(
     N_r=N_r,
     N_f=N_f,
     gamma_e=1,
-    gamma_i=0.8,
+    gamma_i=0.95,
     delta_omega_list=0.0,
     n_restarts=5,
     kappa_scale=0.5,
