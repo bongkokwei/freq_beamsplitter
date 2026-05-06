@@ -41,6 +41,11 @@ from .embed_unitary import (
     beamsplitter,
 )
 
+from .subspace_design import (
+    inverse_design_subspace,
+    SubspaceDesignResult,
+)
+
 __all__ = [
     # core
     "build_K",
@@ -57,6 +62,9 @@ __all__ = [
     "InverseDesignResult",
     "embed_unitary_2x2",
     "beamsplitter",
+    # subspace design
+    "inverse_design_subspace",
+    "SubspaceDesignResult",
 ]
 
 __version__ = "0.1.0"
