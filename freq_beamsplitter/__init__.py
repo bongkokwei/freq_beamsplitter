@@ -46,6 +46,11 @@ from .subspace_design import (
     SubspaceDesignResult,
 )
 
+from .heralded_design import (
+    inverse_design_heralded,
+    HeraldedDesignResult,
+)
+
 __all__ = [
     # core
     "build_K",
@@ -65,6 +70,9 @@ __all__ = [
     # subspace design
     "inverse_design_subspace",
     "SubspaceDesignResult",
+    # heralded design
+    "inverse_design_heralded",
+    "HeraldedDesignResult",
 ]
 
 __version__ = "0.1.0"
