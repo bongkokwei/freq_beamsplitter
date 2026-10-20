@@ -48,7 +48,7 @@ N_RESTARTS = 10
 GAMMA_E = 1.0
 GAMMA_I_DESIGN = 0.0  # gamma_i / gamma_e = 0  ->  lossless design
 gamma_i_sweep = np.linspace(0.0, 10.0, 51)
-F_OVERCOUPLED = 0.9  # show |M| where the overcoupled fidelity drops to this
+F_OVERCOUPLED = 0.99  # show |M| where the overcoupled fidelity drops to this
 
 
 # ── 2. Size the system ───────────────────────────────────────────────────────
@@ -145,7 +145,9 @@ if f_over(0.0) * f_over(GAMMA_E) < 0:
     gi_over = brentq(f_over, 0.0, GAMMA_E)
 else:  # design never reached / never left F_OVERCOUPLED in (0, gamma_e)
     gi_over = GAMMA_E
-    print(f"\nF_full does not cross {F_OVERCOUPLED} in (0, gamma_e); using critical point")
+    print(
+        f"\nF_full does not cross {F_OVERCOUPLED} in (0, gamma_e); using critical point"
+    )
 M_over = M_at(gi_over)
 F_over = fidelity(U_target, M_over)
 eta_over = np.linalg.norm(block(M_over), "fro") ** 2 / D
