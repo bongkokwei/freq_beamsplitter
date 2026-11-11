@@ -89,9 +89,10 @@ def scattering_matrix(
         Scalar → uniform loss.
         Array  → per-mode loss.
         Set to 0 for lossless (unitary) case.
-    delta_omega : float
-        Scalar detuning Δω of the input comb from ring resonances (units of γ_e).
-        Set to 0 for resonant excitation.
+    delta_omega : float or complex array of shape (N,)
+        Detuning Δω of the input comb from ring resonances (units of γ_e).
+        Array → per-mode detuning, e.g. Δω_m - Σ_m with an aux-ring
+        self-energy Σ_m = g²/(Δω - Δ_a + iγ_a) on barrier sites.
 
     Returns
     -------
@@ -114,7 +115,7 @@ def scattering_matrix(
     K = build_K(kappa, N_sb)
 
     # Core resolvent: [Δω·I - i·Γ_tot - K]^{-1}
-    resolvent_inv = delta_omega * np.eye(N) - 1j * Gamma_tot - K
+    resolvent_inv = np.diag(np.broadcast_to(delta_omega, N)) - 1j * Gamma_tot - K
     resolvent = np.linalg.inv(resolvent_inv)
 
     # Scattering matrix: M = I + i sqrt(2Γ_e) · resolvent · sqrt(2Γ_e)
@@ -151,6 +152,7 @@ def cascaded_scattering_matrix(
         Coupling rates (shared across rings unless you pass a list of arrays).
     delta_omega_list : float or list of floats, length N_r
         Per-ring detunings. Scalar → same detuning for all rings.
+        Per-mode detuning: pass a list of length-N arrays, e.g. [d] * N_r.
 
     Returns
     -------

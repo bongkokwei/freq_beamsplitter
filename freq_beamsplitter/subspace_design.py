@@ -50,9 +50,15 @@ def _unpack(x: np.ndarray, N_r: int, N_f: int) -> list:
 # ---------------------------------------------------------------------------
 
 
-def _block_fidelity(M: np.ndarray, U2: np.ndarray, i: int, j: int) -> float:
-    """Fidelity between M[{i,j}, {i,j}] and U2, invariant to global phase."""
-    M_block = M[np.ix_([i, j], [i, j])]
+def _idx(i, j) -> list:
+    """Block modes: i and j may be ints or lists; block = [*i, *j]."""
+    return [int(k) for k in np.atleast_1d(i)] + [int(k) for k in np.atleast_1d(j)]
+
+
+def _block_fidelity(M: np.ndarray, U2: np.ndarray, i, j) -> float:
+    """Fidelity between M[block, block] and U2, invariant to global phase."""
+    idx = _idx(i, j)
+    M_block = M[np.ix_(idx, idx)]
     inner = np.vdot(U2, M_block)  # tr(U2^dagger M_block)
     norm = np.linalg.norm(U2) * np.linalg.norm(M_block)
     if norm == 0:
@@ -60,17 +66,17 @@ def _block_fidelity(M: np.ndarray, U2: np.ndarray, i: int, j: int) -> float:
     return float(np.abs(inner) / norm)
 
 
-def _leakage(M: np.ndarray, i: int, j: int) -> float:
+def _leakage(M: np.ndarray, i, j) -> float:
     """
     Sum |M[k, i]|^2 + |M[k, j]|^2 + |M[i, k]|^2 + |M[j, k]|^2 for k not in {i,j}.
 
     Zero leakage means injecting into mode i or j gives output only in {i,j},
     AND the columns of M for k not in {i,j} don't dump into modes i, j.
     """
-    N = M.shape[0]
-    k_other = [k for k in range(N) if k not in (i, j)]
-    col_leak = np.sum(np.abs(M[np.ix_(k_other, [i, j])]) ** 2)  # rows other, cols i,j
-    row_leak = np.sum(np.abs(M[np.ix_([i, j], k_other)]) ** 2)  # rows i,j, cols other
+    idx = _idx(i, j)
+    k_other = [k for k in range(M.shape[0]) if k not in idx]
+    col_leak = np.sum(np.abs(M[np.ix_(k_other, idx)]) ** 2)  # rows other, cols block
+    row_leak = np.sum(np.abs(M[np.ix_(idx, k_other)]) ** 2)  # rows block, cols other
     return float(col_leak + row_leak)
 
 
@@ -170,8 +176,8 @@ def inverse_design_subspace(
 
     Parameters
     ----------
-    U2 : (2,2) complex ndarray   target unitary on modes (i, j)
-    i, j : int                   subspace mode indices (0-based)
+    U2 : (n,n) complex ndarray   target unitary on the block modes
+    i, j : int or list of int    block = [*i, *j] (0-based); ints → 2x2
     N_sb : int                   sidebands; N = 2*N_sb + 1
     N_r, N_f : int               rings, modulation tones per ring
     lambda_leak : float          weight on the no-leakage penalty
@@ -187,9 +193,10 @@ def inverse_design_subspace(
     SubspaceDesignResult
     """
     N = 2 * N_sb + 1
-    assert U2.shape == (2, 2)
-    assert i != j
-    assert 0 <= i < N and 0 <= j < N
+    idx = _idx(i, j)
+    assert U2.shape == (len(idx), len(idx))
+    assert len(set(idx)) == len(idx)
+    assert all(0 <= k < N for k in idx)
 
     rng = np.random.default_rng(seed)
     n_params = 2 * N_r * N_f
