@@ -19,6 +19,8 @@ DOF check:
     Available : 2·N_r·N_f   = 32 real DOF  ✓
 """
 
+from pathlib import Path
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -30,45 +32,35 @@ from freq_beamsplitter import (
     unitarity_error,
 )
 
-# ── 1. System parameters ─────────────────────────────────────────────────────
+# ── 1. Config ────────────────────────────────────────────────────────────────
 
-N = 7  # frequency modes
-c = N // 2  # centre index: sideband label m = k - c
-N_f = N - 1  # modulation tones per ring
-N_r = 5  # rings in cascade
+N = 5  # frequency modes (odd or even)
+N_f = 4  # modulation tones per ring (useful up to N - 1)
+N_r = 4  # rings in cascade
+GAMMA_I = 0.0  # intrinsic loss / gamma_e, used for design AND reconstruction
+TARGET = "haar"  # "haar" | "shift" | "identity"
+SHIFT_BY = 2  # for "shift": mode k -> k + SHIFT_BY (mod N)
 SEED = 7  # reproducible Haar sample
 
-N_f = 3
-N_r = 1
+c = N // 2  # centre index: sideband label m = k - c
 
-# ── 2a. Draw a Haar-random target unitary ─────────────────────────────────────
-U_target = haar_unitary(N, seed=SEED)
+# ── 2. Target unitary ────────────────────────────────────────────────────────
 
-# ── 2b. Alternatively, define a specific target unitary by permuting modes ───
-shift_by = 2
-num_modes = N
-sigma = (np.arange(num_modes) + shift_by) % (num_modes)  # [2, 3, 4, 5, 6, 0, 1]
-U_target = np.eye(N, dtype=complex)[sigma]
-
-# ── 2c. Or simply target the identity (no transformation) — should be easy to learn! ──
-U_target = np.eye(num_modes, dtype=complex)  # identity (no transformation)
-
-# -- 2d. Single column shift ─────────────────────────────────────────
-input_mode = 0  # physical mode label
-output_mode = +2  # physical mode label
-
-j = input_mode + c  # column index = 3
-i = output_mode + c  # row index = 5
-
-U_target = np.zeros((num_modes, num_modes), dtype=complex)
-U_target[i, j] = 1  # only the (5, 3) entry is set
+if TARGET == "haar":
+    U_target = haar_unitary(N, seed=SEED)
+elif TARGET == "shift":
+    # permutation matrix: input k -> output (k + SHIFT_BY) mod N; valid for any N
+    U_target = np.eye(N, dtype=complex)[(np.arange(N) - SHIFT_BY) % N]
+elif TARGET == "identity":
+    U_target = np.eye(N, dtype=complex)
+else:
+    raise ValueError(f"unknown TARGET {TARGET!r}")
 
 print("=" * 60)
-print("Haar-random unitary — inverse design demo")
+print(f"Inverse design demo — target: {TARGET}")
 print("=" * 60)
-print(f"sigma (mode mapping) : {sigma}")
-print(f"\nTarget U  :  {U_target.shape[0]}×{U_target.shape[1]} Haar-random unitary")
-print(f"System    :  N_r={N_r} rings, N_f={N_f} tones/ring, N={N}")
+print(f"Target U  :  {N}×{N}")
+print(f"System    :  N_r={N_r} rings, N_f={N_f} tones/ring, N={N}, γ_i={GAMMA_I}")
 print(f"Unitarity check on U: {unitarity_error(U_target):.2e}  (expect ~1e-15)\n")
 
 # ── 3. Run inverse design ─────────────────────────────────────────────────────
@@ -79,7 +71,7 @@ result = inverse_design(
     N_r=N_r,
     N_f=N_f,
     gamma_e=1,
-    gamma_i=0.95,
+    gamma_i=GAMMA_I,
     delta_omega_list=0.0,
     n_restarts=5,
     kappa_scale=0.5,
@@ -90,7 +82,7 @@ result = inverse_design(
 
 # ── 4. Reconstruct and inspect the optimised matrix ──────────────────────────
 
-M_opt = cascaded_scattering_matrix(result.kappa_list, N)
+M_opt = cascaded_scattering_matrix(result.kappa_list, N, gamma_i=GAMMA_I)
 
 print(f"\nOptimised system")
 print(f"  Fidelity F(U, M)     : {result.fidelity:.6f}")
@@ -195,13 +187,14 @@ _matrix_panel(
 )
 
 fig.suptitle(
-    f"Haar-random unitary inverse design  —  "
+    f"Inverse design ({TARGET})  —  "
     f"F = {result.fidelity:.5f}  "
     f"(N_r={N_r}, N_f={N_f}, N={N})",
     fontsize=11,
     y=1.01,
 )
 
+Path("figures").mkdir(exist_ok=True)
 plt.savefig(
     f"figures/haar_inverse_design_Nr{N_r}_Nf{N_f}_N{N}.png",
     dpi=150,
