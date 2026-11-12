@@ -1,18 +1,19 @@
 """
 examples/haar_inverse_design.py
 ================================
-Demonstrates inverse design of κ_l parameters to implement a Haar-random
-unitary on the cascaded ring-resonator platform.
+Demonstrates inverse design of κ_l parameters to implement a target
+unitary (Haar-random, or a Pauli X/Y/Z on the central mode pair) on the
+cascaded ring-resonator platform.
 
 Follows Buddhiraju et al. (2021) — gradient-based (L-BFGS) optimisation
 of the fidelity:
 
     F(U, V) = |⟨U, V⟩| / (‖U‖_F ‖V‖_F)
 
-System parameters (matching the paper's 5×5 demonstration):
-    N    = 5  frequency modes  {-2, -1, 0, +1, +2}
-    N_f  = 4  modulation tones per ring
-    N_r  = 4  rings in cascade
+System sizing from N (N = 5 reproduces the paper's 5×5 demonstration):
+    N_f = N - 1                    tones l = 1..N-1 reach every mode pair
+    N_r = ceil(N² / (2·N_f))       ≈ (N + 1) / 2 for large N
+    N = 5  ->  N_f = 4, N_r = 4
 
 DOF check:
     Required  : N²          = 25 real DOF  (5×5 unitary)
@@ -30,16 +31,22 @@ from freq_beamsplitter import (
     inverse_design,
     cascaded_scattering_matrix,
     unitarity_error,
+    embed_unitary_2x2,
 )
+
+PAULI = {
+    "X": np.array([[0, 1], [1, 0]], dtype=complex),
+    "Y": np.array([[0, -1j], [1j, 0]], dtype=complex),
+    "Z": np.array([[1, 0], [0, -1]], dtype=complex),
+}
 
 # ── 1. Config ────────────────────────────────────────────────────────────────
 
 N = 5  # frequency modes (odd or even)
-N_f = 4  # modulation tones per ring (useful up to N - 1)
-N_r = 4  # rings in cascade
+N_f = N - 1  # tones per ring: l = 1..N-1 spans every mode separation
+N_r = int(np.ceil(N**2 / (2 * N_f)))  # DOF count: 2·N_r·N_f >= N²
 GAMMA_I = 0.0  # intrinsic loss / gamma_e, used for design AND reconstruction
-TARGET = "haar"  # "haar" | "shift" | "identity"
-SHIFT_BY = 2  # for "shift": mode k -> k + SHIFT_BY (mod N)
+TARGET = "haar"  # "haar" | "X" | "Y" | "Z" (Pauli on central pair, identity elsewhere)
 SEED = 7  # reproducible Haar sample
 
 c = N // 2  # centre index: sideband label m = k - c
@@ -48,11 +55,9 @@ c = N // 2  # centre index: sideband label m = k - c
 
 if TARGET == "haar":
     U_target = haar_unitary(N, seed=SEED)
-elif TARGET == "shift":
-    # permutation matrix: input k -> output (k + SHIFT_BY) mod N; valid for any N
-    U_target = np.eye(N, dtype=complex)[(np.arange(N) - SHIFT_BY) % N]
-elif TARGET == "identity":
-    U_target = np.eye(N, dtype=complex)
+elif TARGET in PAULI:
+    k = (N - 1) // 2  # central pair (k, k+1); N = 2 -> the Pauli itself
+    U_target = embed_unitary_2x2(PAULI[TARGET], k, k + 1, N)
 else:
     raise ValueError(f"unknown TARGET {TARGET!r}")
 
