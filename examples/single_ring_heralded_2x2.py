@@ -24,6 +24,7 @@ from freq_beamsplitter.heralded_design import inverse_design_heralded
 # ── 1. CONFIG ────────────────────────────────────────────────────────────────
 
 N_sb = 3  # N = 7 modes
+N = 2 * N_sb + 1
 N_f = 6  # modulation tones (single ring DOF = 12)
 i, j = 3, 4  # central pair (m = 0, +1) -- best from sweep
 
@@ -40,7 +41,6 @@ SEED = 0
 
 # ── 2. Run ───────────────────────────────────────────────────────────────────
 
-N = 2 * N_sb + 1
 print("=" * 60)
 print("Single-ring HERALDED 2x2 inverse design")
 print("=" * 60)
@@ -54,7 +54,7 @@ result = inverse_design_heralded(
     U2=U2,
     i=i,
     j=j,
-    N_sb=N_sb,
+    N=N,
     N_r=1,
     N_f=N_f,
     gamma_e=1.0,
@@ -71,7 +71,7 @@ result = inverse_design_heralded(
 # ── 3. Reconstruct ───────────────────────────────────────────────────────────
 
 kappa = result.kappa_list[0]
-M_opt = scattering_matrix(kappa, N_sb=N_sb, gamma_e=1.0, gamma_i=GAMMA_I)
+M_opt = scattering_matrix(kappa, N=N, gamma_e=1.0, gamma_i=GAMMA_I)
 M_block = M_opt[np.ix_([i, j], [i, j])]
 
 # Renormalise the block to its largest singular value -- this is the

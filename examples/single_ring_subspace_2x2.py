@@ -27,6 +27,7 @@ from freq_beamsplitter.subspace_design import inverse_design_subspace
 # ── 1. CONFIG ────────────────────────────────────────────────────────────────
 
 N_sb = 3  # N = 7 modes
+N = 2 * N_sb + 1
 N_f = 6  # modulation tones (single ring DOF = 2*N_f = 12)
 i, j = 3, 4  # subspace mode indices
 
@@ -43,7 +44,6 @@ SEED = 0
 
 # ── 2. Build embedded "target view" for plotting ─────────────────────────────
 
-N = 2 * N_sb + 1
 U_target_view = embed_unitary_2x2(U2=U2, i=i, j=j, N=N)  # for visualisation only
 
 print("=" * 60)
@@ -64,7 +64,7 @@ result = inverse_design_subspace(
     U2=U2,
     i=i,
     j=j,
-    N_sb=N_sb,
+    N=N,
     N_r=1,
     N_f=N_f,
     gamma_e=1.0,
@@ -82,7 +82,7 @@ result = inverse_design_subspace(
 # ── 4. Reconstruct ───────────────────────────────────────────────────────────
 
 kappa = result.kappa_list[0]
-M_opt = scattering_matrix(kappa, N_sb=N_sb, gamma_e=1.0, gamma_i=GAMMA_I)
+M_opt = scattering_matrix(kappa, N=N, gamma_e=1.0, gamma_i=GAMMA_I)
 M_block = M_opt[np.ix_([i, j], [i, j])]
 
 print(f"\nResults")

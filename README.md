@@ -30,13 +30,13 @@ where $K$ is a Hermitian Toeplitz matrix built from the EO modulation coupling c
 import numpy as np
 from freq_beamsplitter import scattering_matrix, cascaded_scattering_matrix, plot_matrix_grid
 
-# Single ring, 5 modes (N_sb=2), 4 modulation tones
+# Single ring, N = 5 modes, 4 modulation tones
 kappa = np.array([0.3+0.1j, 0.2-0.15j, 0.1+0.05j, 0.05+0.2j])
-M = scattering_matrix(kappa, N_sb=2)
+M = scattering_matrix(kappa, N=5)
 
 # 4 cascaded rings
 kappa_list = [np.random.randn(4) + 1j*np.random.randn(4) for _ in range(4)]
-M_total = cascaded_scattering_matrix(kappa_list, N_sb=2)
+M_total = cascaded_scattering_matrix(kappa_list, N=5)
 
 # Visualise
 plot_matrix_grid([M, M_total], ["Single ring", "4-ring cascade"])
@@ -63,9 +63,9 @@ examples/
 
 | Function | Description |
 |---|---|
-| `build_K(kappa, N_sb)` | Build Hermitian Toeplitz coupling matrix $K$ |
-| `scattering_matrix(kappa, N_sb, ...)` | Single-ring scattering matrix (Eq. 5) |
-| `cascaded_scattering_matrix(kappa_list, N_sb, ...)` | Product of N_r ring matrices |
+| `build_K(kappa, N)` | Build Hermitian Toeplitz coupling matrix $K$ |
+| `scattering_matrix(kappa, N, ...)` | Single-ring scattering matrix (Eq. 5) |
+| `cascaded_scattering_matrix(kappa_list, N, ...)` | Product of N_r ring matrices |
 | `unitarity_error(M)` | $\|M^\dagger M - I\|_F$ — deviation from unitarity |
 | `fidelity(U, V)` | Normalised inner product $\|{U,V}\| / (\|U\|_F\|V\|_F)$ |
 

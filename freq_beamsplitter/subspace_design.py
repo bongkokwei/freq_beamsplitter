@@ -85,7 +85,7 @@ def _loss_and_grad(
     U2,
     i,
     j,
-    N_sb,
+    N,
     N_r,
     N_f,
     gamma_e,
@@ -103,7 +103,7 @@ def _loss_and_grad(
         kl = _unpack(xv, N_r, N_f)
         M = cascaded_scattering_matrix(
             kl,
-            N_sb,
+            N,
             gamma_e=gamma_e,
             gamma_i=gamma_i,
             delta_omega_list=delta_omega_list,
@@ -155,7 +155,7 @@ def inverse_design_subspace(
     U2: np.ndarray,
     i: int,
     j: int,
-    N_sb: int,
+    N: int,
     N_r: int,
     N_f: int,
     gamma_e: float = 1.0,
@@ -178,7 +178,7 @@ def inverse_design_subspace(
     ----------
     U2 : (n,n) complex ndarray   target unitary on the block modes
     i, j : int or list of int    block = [*i, *j] (0-based); ints → 2x2
-    N_sb : int                   sidebands; N = 2*N_sb + 1
+    N : int                   number of frequency modes
     N_r, N_f : int               rings, modulation tones per ring
     lambda_leak : float          weight on the no-leakage penalty
                                  (10.0 is a reasonable starting point;
@@ -192,7 +192,6 @@ def inverse_design_subspace(
     -------
     SubspaceDesignResult
     """
-    N = 2 * N_sb + 1
     idx = _idx(i, j)
     assert U2.shape == (len(idx), len(idx))
     assert len(set(idx)) == len(idx)
@@ -218,7 +217,7 @@ def inverse_design_subspace(
                 U2,
                 i,
                 j,
-                N_sb,
+                N,
                 N_r,
                 N_f,
                 gamma_e,
@@ -235,7 +234,7 @@ def inverse_design_subspace(
         kl = _unpack(result.x, N_r, N_f)
         M = cascaded_scattering_matrix(
             kl,
-            N_sb,
+            N,
             gamma_e=gamma_e,
             gamma_i=gamma_i,
             delta_omega_list=delta_omega_list,

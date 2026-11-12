@@ -17,6 +17,7 @@ from freq_beamsplitter import haar_unitary, inverse_design
 
 # ── System parameters ─────────────────────────────────────────────────────────
 N_sb = 2  # sidebands → 5×5 matrix
+N = 2 * N_sb + 1
 N_f = 2 * N_sb  # modulation tones per ring
 N_r = N_sb + 2  # rings in cascade
 SEED = 42  # reproducible Haar sample
@@ -37,7 +38,7 @@ for gi in gamma_i_values:
 
     result = inverse_design(
         U_target,
-        N_sb=N_sb,
+        N=N,
         N_r=N_r,
         N_f=N_f,
         gamma_e=1.0,

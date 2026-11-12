@@ -86,7 +86,7 @@ U_target[np.ix_(modes, modes)] = U
 
 result = inverse_design(
     U_target,
-    N_sb=N_sb,
+    N=N,
     N_r=N_r,
     N_f=N_f,
     gamma_e=GAMMA_E,
@@ -102,7 +102,7 @@ kappa_list = result.kappa_list
 
 
 def M_at(gi):
-    return cascaded_scattering_matrix(kappa_list, N_sb, gamma_e=GAMMA_E, gamma_i=gi)
+    return cascaded_scattering_matrix(kappa_list, N, gamma_e=GAMMA_E, gamma_i=gi)
 
 
 def block(M):

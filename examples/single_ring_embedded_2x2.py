@@ -42,6 +42,7 @@ from freq_beamsplitter import (
 # ── 1. CONFIG ────────────────────────────────────────────────────────────────
 
 N_sb = 3  # sidebands  -> N = 2*N_sb + 1 = 5 modes
+N = 2 * N_sb + 1
 N_f = 6  # modulation tones (single ring DOF = 2*N_f)
 i, j = 4, 3  # mode indices the 2x2 block acts on (0-based)
 theta = np.pi / 2  # mixing angle (pi/2 = 0:100 beamsplitter)
@@ -53,7 +54,6 @@ SEED = 0
 
 # ── 2. Build target unitary ──────────────────────────────────────────────────
 
-N = 2 * N_sb + 1
 U2 = beamsplitter(theta=theta, phi=phi)
 U_target = embed_unitary_2x2(U2=U2, i=i, j=j, N=N)
 
@@ -74,7 +74,7 @@ print(f"\nUnitarity check on U_target: {unitarity_error(U_target):.2e}\n")
 
 result = inverse_design(
     U_target,
-    N_sb=N_sb,
+    N=N,
     N_r=1,  # SINGLE RING
     N_f=N_f,
     gamma_e=1.0,
@@ -91,7 +91,7 @@ result = inverse_design(
 
 # Single ring: result.kappa_list has length 1 -- pull out the lone kappa vector.
 kappa = result.kappa_list[0]
-M_opt = scattering_matrix(kappa, N_sb=N_sb, gamma_e=1.0, gamma_i=GAMMA_I)
+M_opt = scattering_matrix(kappa, N=N, gamma_e=1.0, gamma_i=GAMMA_I)
 
 print(f"\nResults")
 print(f"  Fidelity F(U, M)        : {result.fidelity:.6f}")

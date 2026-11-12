@@ -17,10 +17,10 @@ estimated via forward-mode finite differences (ε = 1e-6).
 
 Degrees-of-freedom reminder
 ---------------------------
-A (2N_sb+1)² unitary has (2N_sb+1)² real DOF.
+An N×N unitary has N² real DOF.
 Each ring contributes 2·N_f real DOF (Re+Im per tone).
-Sufficient condition:  N_r · N_f  ≥  (2N_sb+1)² / 2
-  → for N_sb=2 (5×5): need N_r·N_f ≥ 12.5, e.g. N_r=4, N_f=4 (16 DOF/ring → 32 total)
+Sufficient condition:  N_r · N_f  ≥  N² / 2
+  → for N=5: need N_r·N_f ≥ 12.5, e.g. N_r=4, N_f=4 (16 DOF/ring → 32 total)
 """
 
 import numpy as np
@@ -83,7 +83,7 @@ def _unpack(x: np.ndarray, N_r: int, N_f: int) -> list:
 # Objective and gradient
 # ---------------------------------------------------------------------------
 
-def _loss_and_grad(x, U_target, N_sb, N_r, N_f,
+def _loss_and_grad(x, U_target, N, N_r, N_f,
                    gamma_e, gamma_i, delta_omega_list, eps=1e-6):
     """
     Returns (loss, grad) where loss = 1 - F(U_target, M(x)).
@@ -91,7 +91,7 @@ def _loss_and_grad(x, U_target, N_sb, N_r, N_f,
     """
     def loss_fn(xv):
         kl = _unpack(xv, N_r, N_f)
-        M  = cascaded_scattering_matrix(kl, N_sb,
+        M  = cascaded_scattering_matrix(kl, N,
                                         gamma_e=gamma_e,
                                         gamma_i=gamma_i,
                                         delta_omega_list=delta_omega_list)
@@ -134,7 +134,7 @@ class InverseDesignResult:
 
 def inverse_design(
     U_target         : np.ndarray,
-    N_sb             : int,
+    N                : int,
     N_r              : int,
     N_f              : int,
     gamma_e          : float = 1.0,
@@ -155,9 +155,9 @@ def inverse_design(
 
     Parameters
     ----------
-    U_target         : complex ndarray, shape (2*N_sb+1, 2*N_sb+1)
+    U_target         : complex ndarray, shape (N, N)
         Target unitary matrix (e.g. from :func:`haar_unitary`).
-    N_sb             : int   Number of sidebands (matrix size = 2*N_sb+1).
+    N                : int   Number of frequency modes (matrix size).
     N_r              : int   Number of rings in cascade.
     N_f              : int   Number of modulation tones per ring.
     gamma_e          : float External coupling rate (units of γ).
@@ -178,9 +178,9 @@ def inverse_design(
     hist   = []
 
     dof_available = 2 * N_r * N_f
-    dof_required  = (2 * N_sb + 1) ** 2
+    dof_required  = N ** 2
     if verbose:
-        print(f"Target: {2*N_sb+1}×{2*N_sb+1} unitary  "
+        print(f"Target: {N}×{N} unitary  "
               f"({dof_required} real DOF)")
         print(f"System: N_r={N_r} rings × N_f={N_f} tones  "
               f"→  {dof_available} real DOF  "
@@ -198,7 +198,7 @@ def inverse_design(
 
         def callback(xk):
             kl = _unpack(xk, N_r, N_f)
-            M  = cascaded_scattering_matrix(kl, N_sb,
+            M  = cascaded_scattering_matrix(kl, N,
                                             gamma_e=gamma_e,
                                             gamma_i=gamma_i,
                                             delta_omega_list=delta_omega_list)
@@ -208,7 +208,7 @@ def inverse_design(
         res = minimize(
             fun=_loss_and_grad,
             x0=x0,
-            args=(U_target, N_sb, N_r, N_f, gamma_e, gamma_i, delta_omega_list),
+            args=(U_target, N, N_r, N_f, gamma_e, gamma_i, delta_omega_list),
             method='L-BFGS-B',
             jac=True,
             callback=callback,
@@ -216,7 +216,7 @@ def inverse_design(
         )
 
         kl_opt = _unpack(res.x, N_r, N_f)
-        M_opt  = cascaded_scattering_matrix(kl_opt, N_sb,
+        M_opt  = cascaded_scattering_matrix(kl_opt, N,
                                             gamma_e=gamma_e,
                                             gamma_i=gamma_i,
                                             delta_omega_list=delta_omega_list)

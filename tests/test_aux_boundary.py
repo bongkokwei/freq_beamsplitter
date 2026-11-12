@@ -10,17 +10,17 @@ d = np.zeros(N, complex)
 d[[3, 8]] = 1e4  # strong barrier (g >> kappa)
 
 k1 = np.array([0.4 + 0.2j])  # nearest-neighbour only
-M = scattering_matrix(k1, N_sb, delta_omega=d)
+M = scattering_matrix(k1, N, delta_omega=d)
 
 # Scalar and per-mode-constant detuning agree (old behaviour kept)
-assert np.allclose(scattering_matrix(k1, N_sb, delta_omega=0.3),
-                   scattering_matrix(k1, N_sb, delta_omega=np.full(N, 0.3)))
+assert np.allclose(scattering_matrix(k1, N, delta_omega=0.3),
+                   scattering_matrix(k1, N, delta_omega=np.full(N, 0.3)))
 
 # kappa_1 only: barrier isolates the segment -> no leakage
 assert _leakage(M, seg[:2], seg[2:]) < 1e-6
 
 # kappa_2 hops over the barrier -> leakage appears
-M2 = scattering_matrix(np.array([0.4, 0.3]), N_sb, delta_omega=d)
+M2 = scattering_matrix(np.array([0.4, 0.3]), N, delta_omega=d)
 assert _leakage(M2, seg[:2], seg[2:]) > 1e-2
 
 # 4x4 block fidelity against itself is 1

@@ -30,6 +30,7 @@ from freq_beamsplitter.heralded_design import block_fidelity, heralding_probabil
 # ── 1. CONFIG ────────────────────────────────────────────────────────────────
 
 N_sb = 3  # N = 7 modes
+N = 2 * N_sb + 1
 N_f = 3  # modulation tones (single ring DOF = 6)
 i, j = 3, 4  # central pair (m = 0, +1)
 U2 = beamsplitter(theta=np.pi / 4, phi=0.0)
@@ -43,7 +44,6 @@ CHIPS = {"Existing chip": (7.2, "tab:orange"), "Redesign chip": (0.25, "tab:gree
 N_RESTARTS = 30
 SEED = 0
 
-N = 2 * N_sb + 1
 mode_labels = [str(m) for m in range(-N_sb, N_sb + 1)]
 
 
@@ -58,7 +58,7 @@ result = inverse_design_heralded(
     U2=U2,
     i=i,
     j=j,
-    N_sb=N_sb,
+    N=N,
     N_r=1,
     N_f=N_f,
     gamma_e=GAMMA_E,
@@ -82,7 +82,7 @@ for l, kl in enumerate(kappa, start=1):
 
 
 def M_at(gi):
-    return scattering_matrix(kappa, N_sb=N_sb, gamma_e=GAMMA_E, gamma_i=gi)
+    return scattering_matrix(kappa, N=N, gamma_e=GAMMA_E, gamma_i=gi)
 
 
 F_post = np.array([block_fidelity(M_at(gi), U2, i, j) for gi in gamma_i_sweep])

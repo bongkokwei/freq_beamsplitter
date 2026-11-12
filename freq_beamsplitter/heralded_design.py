@@ -86,7 +86,7 @@ def _loss_and_grad(
     U2,
     i,
     j,
-    N_sb,
+    N,
     N_r,
     N_f,
     gamma_e,
@@ -100,7 +100,7 @@ def _loss_and_grad(
         kl = _unpack(xv, N_r, N_f)
         M = cascaded_scattering_matrix(
             kl,
-            N_sb,
+            N,
             gamma_e=gamma_e,
             gamma_i=gamma_i,
             delta_omega_list=delta_omega_list,
@@ -151,7 +151,7 @@ def inverse_design_heralded(
     U2: np.ndarray,
     i: int,
     j: int,
-    N_sb: int,
+    N: int,
     N_r: int,
     N_f: int,
     gamma_e: float = 1.0,
@@ -171,7 +171,7 @@ def inverse_design_heralded(
     ----------
     U2 : (2, 2) complex ndarray   target unitary on modes (i, j)
     i, j : int                    subspace mode indices (0-based)
-    N_sb : int                    sidebands; N = 2*N_sb + 1
+    N : int                    number of frequency modes
     N_r, N_f : int                rings, modulation tones per ring
     n_restarts : int              multi-start L-BFGS-B (non-convex)
     fidelity_tol : float          early stop: F_block >= fidelity_tol
@@ -181,7 +181,6 @@ def inverse_design_heralded(
     -------
     HeraldedDesignResult
     """
-    N = 2 * N_sb + 1
     assert U2.shape == (2, 2)
     assert i != j
     assert 0 <= i < N and 0 <= j < N
@@ -203,7 +202,7 @@ def inverse_design_heralded(
         result = minimize(
             _loss_and_grad,
             x0,
-            args=(U2, i, j, N_sb, N_r, N_f, gamma_e, gamma_i, delta_omega_list),
+            args=(U2, i, j, N, N_r, N_f, gamma_e, gamma_i, delta_omega_list),
             method="L-BFGS-B",
             jac=True,
             options={"maxiter": 500, "ftol": 1e-12, "gtol": 1e-9},
@@ -212,7 +211,7 @@ def inverse_design_heralded(
         kl = _unpack(result.x, N_r, N_f)
         M = cascaded_scattering_matrix(
             kl,
-            N_sb,
+            N,
             gamma_e=gamma_e,
             gamma_i=gamma_i,
             delta_omega_list=delta_omega_list,

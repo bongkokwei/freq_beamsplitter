@@ -24,6 +24,7 @@ from freq_beamsplitter import scattering_matrix
 # ── 1. CONFIG ────────────────────────────────────────────────────────────────
 
 N_sb = 3  # N = 7 modes
+N = 2 * N_sb + 1
 N_f = 6  # modulation tones
 N_SAMPLES = 5000  # Monte Carlo samples
 KAPPA_SCALE = 0.5  # std-dev of complex Gaussian on each kappa_l
@@ -81,7 +82,6 @@ def block_metrics(M, i, j):
 
 # ── 3. Sweep ─────────────────────────────────────────────────────────────────
 
-N = 2 * N_sb + 1
 adjacent_pairs = [(k, k + 1) for k in range(N - 1)]
 n_pairs = len(adjacent_pairs)
 
@@ -96,7 +96,7 @@ print(f"Adjacent pairs: {adjacent_pairs}")
 
 for s in range(N_SAMPLES):
     kappa = (rng.standard_normal(N_f) + 1j * rng.standard_normal(N_f)) * KAPPA_SCALE
-    M = scattering_matrix(kappa, N_sb=N_sb, gamma_e=1.0, gamma_i=GAMMA_I)
+    M = scattering_matrix(kappa, N=N, gamma_e=1.0, gamma_i=GAMMA_I)
     for pair in adjacent_pairs:
         P, Uerr, F_BS, F_X, F_Z = block_metrics(M, *pair)
         data[pair]["P"].append(P)

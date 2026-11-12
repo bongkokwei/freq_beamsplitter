@@ -156,18 +156,18 @@ if __name__ == "__main__":
         unitarity_error,
     )
 
-    N_sb = 2
+    N = 5
     N_f  = 4
     rng  = np.random.default_rng(42)
     kappa = rng.random(N_f) * 0.5 + 1j * rng.random(N_f) * 0.5
 
-    M_ideal = scattering_matrix(kappa, N_sb)
-    M_lossy = scattering_matrix(kappa, N_sb, gamma_i=0.05)
-    M_det   = scattering_matrix(kappa, N_sb, delta_omega=0.5)
+    M_ideal = scattering_matrix(kappa, N)
+    M_lossy = scattering_matrix(kappa, N, gamma_i=0.05)
+    M_det   = scattering_matrix(kappa, N, delta_omega=0.5)
 
     N_r = 4
     kappa_list = [rng.random(N_f) * 0.5 + 1j * rng.random(N_f) * 0.5 for _ in range(N_r)]
-    M_casc = cascaded_scattering_matrix(kappa_list, N_sb)
+    M_casc = cascaded_scattering_matrix(kappa_list, N)
 
     # Individual plots
     fig1 = plot_matrix(M_ideal, title="Lossless, on-resonance")

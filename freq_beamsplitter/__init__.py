@@ -13,7 +13,7 @@ Quick start
 
     import numpy as np
     kappa = np.array([0.3+0.1j, 0.2-0.15j])
-    M = scattering_matrix(kappa, N_sb=2)
+    M = scattering_matrix(kappa, N=5)
     plot_matrix(M, title="Single ring")
 """
 

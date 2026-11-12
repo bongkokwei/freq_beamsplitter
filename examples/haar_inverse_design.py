@@ -33,6 +33,7 @@ from freq_beamsplitter import (
 # ── 1. System parameters ─────────────────────────────────────────────────────
 
 N_sb = 3  # sidebands
+N = 2 * N_sb + 1
 N_f = 2 * N_sb  # modulation tones per ring
 N_r = N_sb + 2  # rings in cascade
 SEED = 7  # reproducible Haar sample
@@ -74,7 +75,7 @@ print(f"Unitarity check on U: {unitarity_error(U_target):.2e}  (expect ~1e-15)\n
 
 result = inverse_design(
     U_target,
-    N_sb=N_sb,
+    N=N,
     N_r=N_r,
     N_f=N_f,
     gamma_e=1,
@@ -89,7 +90,7 @@ result = inverse_design(
 
 # ── 4. Reconstruct and inspect the optimised matrix ──────────────────────────
 
-M_opt = cascaded_scattering_matrix(result.kappa_list, N_sb)
+M_opt = cascaded_scattering_matrix(result.kappa_list, N)
 
 print(f"\nOptimised system")
 print(f"  Fidelity F(U, M)     : {result.fidelity:.6f}")
@@ -168,7 +169,6 @@ ax_phase_kappa.set_title("κ_l in complex plane (polar)", pad=14)
 ax_phase_kappa.legend(fontsize=7, loc="upper right", bbox_to_anchor=(1.35, 1.1))
 
 # ── 6d–f. Scattering matrices: target, achieved, difference ──────────────────
-N = 2 * N_sb + 1
 lbls = [str(m) for m in range(-N_sb, N_sb + 1)]
 
 

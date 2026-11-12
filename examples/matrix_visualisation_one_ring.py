@@ -20,6 +20,7 @@ def main():
     args = parser.parse_args()
 
     N_sb = args.N_sb
+    N = 2 * N_sb + 1
     N_tones = args.N_tones
     mode_num = args.mode_num
 
@@ -29,7 +30,7 @@ def main():
     rng = np.random.default_rng(42)
     kappa = rng.standard_normal(N_tones) + 1j * rng.standard_normal(N_tones)
 
-    M = scattering_matrix(kappa, N_sb, gamma_i=0.0)
+    M = scattering_matrix(kappa, N, gamma_i=0.0)
 
     s_in = np.zeros(2 * N_sb + 1, dtype=complex)
     s_in[N_sb + mode_num] = 1.0
