@@ -23,8 +23,8 @@ from freq_beamsplitter import scattering_matrix
 
 # ── 1. CONFIG ────────────────────────────────────────────────────────────────
 
-N_sb = 3  # N = 7 modes
-N = 2 * N_sb + 1
+N = 7  # frequency modes
+c = N // 2  # centre index: sideband label m = k - c
 N_f = 6  # modulation tones
 N_SAMPLES = 5000  # Monte Carlo samples
 KAPPA_SCALE = 0.5  # std-dev of complex Gaussian on each kappa_l
@@ -160,7 +160,7 @@ for ax, pair in zip(axes, adjacent_pairs):
         vmin=0,
         vmax=1.5,
     )
-    ax.set_title(f"modes {pair}  (m={pair[0]-N_sb}, {pair[1]-N_sb})", fontsize=10)
+    ax.set_title(f"modes {pair}  (m={pair[0]-c}, {pair[1]-c})", fontsize=10)
     ax.axhline(0.95, ls="--", c="red", lw=0.6, alpha=0.5)
     ax.axvline(1.8, ls="--", c="red", lw=0.6, alpha=0.5)
     ax.set_xlim(0, 2)

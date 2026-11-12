@@ -3,9 +3,9 @@ import numpy as np
 from freq_beamsplitter.core import scattering_matrix
 from freq_beamsplitter.subspace_design import _block_fidelity, _leakage
 
-# Aux FSR = 5 x main FSR -> barriers every 5th site. N = 11 lattice (N_sb=5),
+# Aux FSR = 5 x main FSR -> barriers every 5th site. N = 11 lattice,
 # barriers at 3 and 8, even segment {4,5,6,7} in the middle.
-N_sb, N, seg = 5, 11, [4, 5, 6, 7]
+N, seg = 11, [4, 5, 6, 7]
 d = np.zeros(N, complex)
 d[[3, 8]] = 1e4  # strong barrier (g >> kappa)
 

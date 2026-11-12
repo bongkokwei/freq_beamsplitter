@@ -26,8 +26,7 @@ from freq_beamsplitter.subspace_design import inverse_design_subspace
 
 # ── 1. CONFIG ────────────────────────────────────────────────────────────────
 
-N_sb = 3  # N = 7 modes
-N = 2 * N_sb + 1
+N = 7  # frequency modes
 N_f = 6  # modulation tones (single ring DOF = 2*N_f = 12)
 i, j = 3, 4  # subspace mode indices
 

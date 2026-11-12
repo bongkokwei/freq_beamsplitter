@@ -10,12 +10,12 @@ of the fidelity:
     F(U, V) = |⟨U, V⟩| / (‖U‖_F ‖V‖_F)
 
 System parameters (matching the paper's 5×5 demonstration):
-    N_sb = 2  →  5 frequency modes  {-2, -1, 0, +1, +2}
+    N    = 5  frequency modes  {-2, -1, 0, +1, +2}
     N_f  = 4  modulation tones per ring
     N_r  = 4  rings in cascade
 
 DOF check:
-    Required  : (2·N_sb+1)² = 25 real DOF  (5×5 unitary)
+    Required  : N²          = 25 real DOF  (5×5 unitary)
     Available : 2·N_r·N_f   = 32 real DOF  ✓
 """
 
@@ -32,23 +32,23 @@ from freq_beamsplitter import (
 
 # ── 1. System parameters ─────────────────────────────────────────────────────
 
-N_sb = 3  # sidebands
-N = 2 * N_sb + 1
-N_f = 2 * N_sb  # modulation tones per ring
-N_r = N_sb + 2  # rings in cascade
+N = 7  # frequency modes
+c = N // 2  # centre index: sideband label m = k - c
+N_f = N - 1  # modulation tones per ring
+N_r = 5  # rings in cascade
 SEED = 7  # reproducible Haar sample
 
-N_f = N_sb
+N_f = 3
 N_r = 1
 
 # ── 2a. Draw a Haar-random target unitary ─────────────────────────────────────
-U_target = haar_unitary(2 * N_sb + 1, seed=SEED)
+U_target = haar_unitary(N, seed=SEED)
 
 # ── 2b. Alternatively, define a specific target unitary by permuting modes ───
 shift_by = 2
-num_modes = 2 * N_sb + 1
+num_modes = N
 sigma = (np.arange(num_modes) + shift_by) % (num_modes)  # [2, 3, 4, 5, 6, 0, 1]
-U_target = np.eye(2 * N_sb + 1, dtype=complex)[sigma]
+U_target = np.eye(N, dtype=complex)[sigma]
 
 # ── 2c. Or simply target the identity (no transformation) — should be easy to learn! ──
 U_target = np.eye(num_modes, dtype=complex)  # identity (no transformation)
@@ -57,8 +57,8 @@ U_target = np.eye(num_modes, dtype=complex)  # identity (no transformation)
 input_mode = 0  # physical mode label
 output_mode = +2  # physical mode label
 
-j = input_mode + N_sb  # column index = 3
-i = output_mode + N_sb  # row index = 5
+j = input_mode + c  # column index = 3
+i = output_mode + c  # row index = 5
 
 U_target = np.zeros((num_modes, num_modes), dtype=complex)
 U_target[i, j] = 1  # only the (5, 3) entry is set
@@ -68,7 +68,7 @@ print("Haar-random unitary — inverse design demo")
 print("=" * 60)
 print(f"sigma (mode mapping) : {sigma}")
 print(f"\nTarget U  :  {U_target.shape[0]}×{U_target.shape[1]} Haar-random unitary")
-print(f"System    :  N_r={N_r} rings, N_f={N_f} tones/ring, N_sb={N_sb}")
+print(f"System    :  N_r={N_r} rings, N_f={N_f} tones/ring, N={N}")
 print(f"Unitarity check on U: {unitarity_error(U_target):.2e}  (expect ~1e-15)\n")
 
 # ── 3. Run inverse design ─────────────────────────────────────────────────────
@@ -169,7 +169,7 @@ ax_phase_kappa.set_title("κ_l in complex plane (polar)", pad=14)
 ax_phase_kappa.legend(fontsize=7, loc="upper right", bbox_to_anchor=(1.35, 1.1))
 
 # ── 6d–f. Scattering matrices: target, achieved, difference ──────────────────
-lbls = [str(m) for m in range(-N_sb, N_sb + 1)]
+lbls = [str(m) for m in range(-c, N - c)]
 
 
 def _matrix_panel(ax, data, title, cmap, vmin, vmax, clabel):
@@ -197,15 +197,15 @@ _matrix_panel(
 fig.suptitle(
     f"Haar-random unitary inverse design  —  "
     f"F = {result.fidelity:.5f}  "
-    f"(N_r={N_r}, N_f={N_f}, N_sb={N_sb})",
+    f"(N_r={N_r}, N_f={N_f}, N={N})",
     fontsize=11,
     y=1.01,
 )
 
 plt.savefig(
-    f"figures/haar_inverse_design_Nr{N_r}_Nf{N_f}_Nsb{N_sb}.png",
+    f"figures/haar_inverse_design_Nr{N_r}_Nf{N_f}_N{N}.png",
     dpi=150,
     bbox_inches="tight",
 )
-print(f"\nFigure saved to haar_inverse_design_Nr{N_r}_Nf{N_f}_Nsb{N_sb}.png")
+print(f"\nFigure saved to haar_inverse_design_Nr{N_r}_Nf{N_f}_N{N}.png")
 plt.show()

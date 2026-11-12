@@ -23,8 +23,8 @@ from freq_beamsplitter.heralded_design import inverse_design_heralded
 
 # ── 1. CONFIG ────────────────────────────────────────────────────────────────
 
-N_sb = 3  # N = 7 modes
-N = 2 * N_sb + 1
+N = 7  # frequency modes
+c = N // 2  # centre index: sideband label m = k - c
 N_f = 6  # modulation tones (single ring DOF = 12)
 i, j = 3, 4  # central pair (m = 0, +1) -- best from sweep
 
@@ -45,7 +45,7 @@ print("=" * 60)
 print("Single-ring HERALDED 2x2 inverse design")
 print("=" * 60)
 print(f"\nSystem    : N = {N}, single ring, N_f = {N_f}")
-print(f"Subspace  : modes ({i}, {j})  (m = {i-N_sb}, {j-N_sb})")
+print(f"Subspace  : modes ({i}, {j})  (m = {i-c}, {j-c})")
 print(f"Target U2 :")
 print(np.array2string(U2, precision=3, suppress_small=True))
 print()

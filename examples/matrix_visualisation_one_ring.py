@@ -9,7 +9,7 @@ def main():
         description="Single ring scattering matrix visualiser"
     )
     parser.add_argument(
-        "--N-sb", type=int, default=3, help="Number of sidebands (default: 3)"
+        "--N", type=int, default=7, help="Number of frequency modes (default: 7)"
     )
     parser.add_argument(
         "--N-tones", type=int, default=2, help="Number of modulation tones (default: 2)"
@@ -19,37 +19,37 @@ def main():
     )
     args = parser.parse_args()
 
-    N_sb = args.N_sb
-    N = 2 * N_sb + 1
+    N = args.N
+    c = N // 2  # centre index: sideband label m = k - c
     N_tones = args.N_tones
     mode_num = args.mode_num
 
-    assert abs(mode_num) <= N_sb, f"mode_num must be in [{-N_sb}, {N_sb}]"
-    assert N_tones <= 2 * N_sb, f"N_tones must be <= 2*N_sb = {2*N_sb}"
+    assert -c <= mode_num < N - c, f"mode_num must be in [{-c}, {N - c - 1}]"
+    assert N_tones <= N - 1, f"N_tones must be <= N - 1 = {N - 1}"
 
     rng = np.random.default_rng(42)
     kappa = rng.standard_normal(N_tones) + 1j * rng.standard_normal(N_tones)
 
     M = scattering_matrix(kappa, N, gamma_i=0.0)
 
-    s_in = np.zeros(2 * N_sb + 1, dtype=complex)
-    s_in[N_sb + mode_num] = 1.0
+    s_in = np.zeros(N, dtype=complex)
+    s_in[c + mode_num] = 1.0
     s_out = M @ s_in
 
-    modes = np.arange(-N_sb, N_sb + 1)
+    modes = np.arange(-c, N - c)
 
     fig, axes = plt.subplots(1, 3, figsize=(15, 4))
     fig.suptitle(
-        f"Single ring — N_sb={N_sb}, {N_tones} tone(s), input m={mode_num}, γ_i = 0"
+        f"Single ring — N={N}, {N_tones} tone(s), input m={mode_num}, γ_i = 0"
     )
 
     im0 = axes[0].imshow(np.abs(M), vmin=0, vmax=1, cmap="viridis")
     axes[0].set_title("|M|")
     axes[0].set_xlabel("Input mode m'")
     axes[0].set_ylabel("Output mode m")
-    axes[0].set_xticks(range(2 * N_sb + 1))
+    axes[0].set_xticks(range(N))
     axes[0].set_xticklabels(modes)
-    axes[0].set_yticks(range(2 * N_sb + 1))
+    axes[0].set_yticks(range(N))
     axes[0].set_yticklabels(modes)
     plt.colorbar(im0, ax=axes[0])
 
@@ -57,9 +57,9 @@ def main():
     axes[1].set_title("∠M / π")
     axes[1].set_xlabel("Input mode m'")
     axes[1].set_ylabel("Output mode m")
-    axes[1].set_xticks(range(2 * N_sb + 1))
+    axes[1].set_xticks(range(N))
     axes[1].set_xticklabels(modes)
-    axes[1].set_yticks(range(2 * N_sb + 1))
+    axes[1].set_yticks(range(N))
     axes[1].set_yticklabels(modes)
     plt.colorbar(im1, ax=axes[1])
 

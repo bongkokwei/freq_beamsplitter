@@ -7,7 +7,7 @@ embedded into an N x N identity, acting on user-chosen modes (i, j).
 System
 ------
     N_r  = 1          (single ring)
-    N    = 2*N_sb + 1 (matrix dimension; user picks via N_sb)
+    N    = number of frequency modes (user picks)
     N_f  = number of modulation tones (user picks)
 
 DOF check
@@ -20,7 +20,7 @@ DOF check
 Usage
 -----
 Edit the CONFIG block below to choose:
-    - N_sb (system size)
+    - N    (system size)
     - N_f  (modulation tones)
     - i, j (which modes the 2x2 block acts on)
     - theta, phi (rotation parameters)
@@ -41,8 +41,7 @@ from freq_beamsplitter import (
 
 # ── 1. CONFIG ────────────────────────────────────────────────────────────────
 
-N_sb = 3  # sidebands  -> N = 2*N_sb + 1 = 5 modes
-N = 2 * N_sb + 1
+N = 7  # frequency modes
 N_f = 6  # modulation tones (single ring DOF = 2*N_f)
 i, j = 4, 3  # mode indices the 2x2 block acts on (0-based)
 theta = np.pi / 2  # mixing angle (pi/2 = 0:100 beamsplitter)
@@ -60,7 +59,7 @@ U_target = embed_unitary_2x2(U2=U2, i=i, j=j, N=N)
 print("=" * 60)
 print("Single-ring inverse design -- 2x2 block embedded in identity")
 print("=" * 60)
-print(f"\nSystem size  : {N} x {N}  (N_sb = {N_sb})")
+print(f"\nSystem size  : {N} x {N}")
 print(f"Modulation   : N_f = {N_f} tones, single ring (N_r = 1)")
 print(f"DOF          : available 2*N_f = {2*N_f},  target ~4 (block) + identity rest")
 print(f"Block action : modes (i, j) = ({i}, {j})")

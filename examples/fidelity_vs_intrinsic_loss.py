@@ -16,17 +16,16 @@ import matplotlib.pyplot as plt
 from freq_beamsplitter import haar_unitary, inverse_design
 
 # ── System parameters ─────────────────────────────────────────────────────────
-N_sb = 2  # sidebands → 5×5 matrix
-N = 2 * N_sb + 1
-N_f = 2 * N_sb  # modulation tones per ring
-N_r = N_sb + 2  # rings in cascade
+N = 5  # frequency modes → 5×5 matrix
+N_f = N - 1  # modulation tones per ring
+N_r = 4  # rings in cascade
 SEED = 42  # reproducible Haar sample
 
 # ── γ_i sweep ─────────────────────────────────────────────────────────────────
 gamma_i_values = np.linspace(0.0, 1.0, 15)  # adjust resolution / range as needed
 
 # ── Target unitary (fixed across sweep) ───────────────────────────────────────
-U_target = haar_unitary(2 * N_sb + 1, seed=SEED)
+U_target = haar_unitary(N, seed=SEED)
 
 # ── Run sweep ─────────────────────────────────────────────────────────────────
 fidelities = []
@@ -76,8 +75,8 @@ ax2.set_title("Infidelity vs intrinsic loss", fontsize=14)
 ax2.grid(True, alpha=0.3, which="both")
 
 fig.suptitle(
-    f"$N_{{sb}}={N_sb}$,  $N_r={N_r}$,  $N_f={N_f}$  "
-    f"(Haar-random {2*N_sb+1}×{2*N_sb+1} target)",
+    f"$N={N}$,  $N_r={N_r}$,  $N_f={N_f}$  "
+    f"(Haar-random {N}×{N} target)",
     fontsize=12,
     y=1.02,
 )

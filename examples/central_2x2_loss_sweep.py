@@ -6,7 +6,7 @@ Heralded (post-selected) 2x2 beamsplitter embedded near the centre of a
 ring (gamma_i / gamma_e = 0), then freeze them and sweep the intrinsic
 loss gamma_i / gamma_e from 0 to 10.
 
-    N_sb = 3  ->  N = 7 modes, m = -3..+3
+    N = 7 modes, m = -3..+3
     N_r  = 1, N_f = 3
     (i, j) = (3, 4)  ->  m = 0, +1
     U2   = beamsplitter(theta = pi/4)  (50:50)
@@ -29,8 +29,8 @@ from freq_beamsplitter.heralded_design import block_fidelity, heralding_probabil
 
 # ── 1. CONFIG ────────────────────────────────────────────────────────────────
 
-N_sb = 3  # N = 7 modes
-N = 2 * N_sb + 1
+N = 7  # frequency modes
+c = N // 2  # centre index: sideband label m = k - c
 N_f = 3  # modulation tones (single ring DOF = 6)
 i, j = 3, 4  # central pair (m = 0, +1)
 U2 = beamsplitter(theta=np.pi / 4, phi=0.0)
@@ -44,7 +44,7 @@ CHIPS = {"Existing chip": (7.2, "tab:orange"), "Redesign chip": (0.25, "tab:gree
 N_RESTARTS = 30
 SEED = 0
 
-mode_labels = [str(m) for m in range(-N_sb, N_sb + 1)]
+mode_labels = [str(m) for m in range(-c, N - c)]
 
 
 # ── 2. Lossless heralded design ──────────────────────────────────────────────
@@ -52,7 +52,7 @@ mode_labels = [str(m) for m in range(-N_sb, N_sb + 1)]
 print("=" * 60)
 print("Central 2x2 (pi/4 BS) in 7x7  ->  lossless design  ->  loss sweep")
 print("=" * 60)
-print(f"N = {N}, single ring, N_f = {N_f},  subspace m = ({i-N_sb}, {j-N_sb})\n")
+print(f"N = {N}, single ring, N_f = {N_f},  subspace m = ({i-c}, {j-c})\n")
 
 result = inverse_design_heralded(
     U2=U2,
@@ -129,7 +129,7 @@ ax.set_ylim(0, 1.05)
 ax.set_xlim(gamma_i_sweep[0], gamma_i_sweep[-1])
 ax.grid(True, alpha=0.3)
 ax.legend(frameon=False, loc="center right")
-ax.set_title(rf"$\pi/4$ BS on m = ({i-N_sb}, {j-N_sb}),  $N_f = {N_f}$")
+ax.set_title(rf"$\pi/4$ BS on m = ({i-c}, {j-c}),  $N_f = {N_f}$")
 save(fig, "central_2x2_fidelity_vs_loss")
 
 # 4b. |M| at each integer loss, 2x2 block outlined

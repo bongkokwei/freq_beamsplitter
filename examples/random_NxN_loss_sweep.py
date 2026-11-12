@@ -8,21 +8,16 @@ from 0 to 10 to see how the fixed design degrades.
 Usage:
     python examples/random_NxN_loss_sweep.py [D]      (default D = 5)
 
-Sizing (N_sb, N_r, N_f) for a D x D target:
-    The ring always acts on an odd number of modes N = 2*N_sb + 1, so the
-    smallest system that holds D modes is N_sb = ceil((D - 1) / 2).
-      * D odd  ->  N = D, the target fills the whole lattice:  U_target = U_D.
-      * D even ->  N = D + 1, the target sits on modes m = -N_sb..N_sb-1 and
-                   the spare mode m = +N_sb is asked to be identity:
-                   U_target = U_D (+) 1.
+Sizing (N, N_r, N_f) for a D x D target:
+    N = D: the target fills the whole lattice, U_target = U_D (odd or even D).
 
     N_f : tone l couples m -> m + l, and |l| <= N - 1 is the largest
-          separation inside the lattice, so N_f = N - 1 = 2*N_sb.
+          separation inside the lattice, so N_f = N - 1.
     N_r : the full N x N target has N^2 real DOF and each ring brings
           2*N_f, so N_r = ceil(N^2 / (2*N_f)).
 
-    e.g. D = 4 -> N_sb = 2, N = 5, N_f = 4, N_r = 4  (32 DOF >= 25 required)
-         D = 5 -> same system, no spare mode.
+    e.g. D = 4 -> N = 4, N_f = 3, N_r = 3  (18 DOF >= 16 required)
+         D = 5 -> N = 5, N_f = 4, N_r = 4  (32 DOF >= 25 required)
 """
 
 import sys
@@ -53,26 +48,23 @@ F_OVERCOUPLED = 0.99  # show |M| where the overcoupled fidelity drops to this
 
 # ── 2. Size the system ───────────────────────────────────────────────────────
 
-N_sb = int(np.ceil((D - 1) / 2))
-N = 2 * N_sb + 1
-N_f = 2 * N_sb
+N = D
+c = N // 2  # centre index: sideband label m = k - c
+N_f = N - 1
 N_r = int(np.ceil(N**2 / (2 * N_f)))
-padded = N > D  # D even -> one spare mode held at identity
 
-modes = list(range(D))  # indices 0..D-1  ->  m = -N_sb .. D-1-N_sb
+modes = list(range(D))
 tag = f"random_{D}x{D}"  # figure filename prefix
 
 # LaTeX labels for the target and its block
 U_D = rf"U_{{{D}}}"
-U_full = rf"{U_D} \oplus 1" if padded else U_D
 
 print("=" * 60)
 print(f"Random {D}x{D} unitary  ->  lossless design  ->  loss sweep")
 print("=" * 60)
-print(f"N_sb = {N_sb}  (N = {N} modes),  N_f = {N_f},  N_r = {N_r}")
+print(f"N = {N} modes,  N_f = {N_f},  N_r = {N_r}")
 print(f"DOF : required {N**2},  available {2 * N_r * N_f}")
-print(f"Target block on m = {[k - N_sb for k in modes]}", end="")
-print(f",  spare mode m = {N_sb} -> identity\n" if padded else "\n")
+print(f"Target on m = {[k - c for k in modes]}\n")
 
 
 # ── 3. Target: Haar-random U_D, embedded as U_D (+) 1 when D is even ──────
@@ -163,7 +155,7 @@ print(np.array2string(M_over, precision=3, suppress_small=True))
 
 plt.style.use("dark_background")
 X_LABEL = r"$\gamma_i / \gamma_e$"
-mode_labels = [str(m) for m in range(-N_sb, N_sb + 1)]
+mode_labels = [str(m) for m in range(-c, N - c)]
 
 
 def save(fig, name):
@@ -186,15 +178,7 @@ ax.text(
     va="bottom",
     fontsize=9,
 )
-ax.plot(gamma_i_sweep, F_full, "o-", ms=3, label=rf"Full {N}x{N}: $F({U_full}, M)$")
-if padded:  # with no spare mode the block is the full matrix
-    ax.plot(
-        gamma_i_sweep,
-        F_block,
-        "s-",
-        ms=3,
-        label=rf"{D}x{D} block: $F({U_D}, M_{{{D}}})$",
-    )
+ax.plot(gamma_i_sweep, F_full, "o-", ms=3, label=rf"Full {N}x{N}: $F({U_D}, M)$")
 ax.plot(
     gi_over,
     F_over,
@@ -223,7 +207,7 @@ save(fig, f"{tag}_transmission_vs_loss")
 # 6c. |M| for target, lossless, overcoupled point, maximum loss
 M_max_loss = M_at(gamma_i_sweep[-1])
 for name, mat, title in [
-    ("target", U_target, rf"Target $|{U_full}|$"),
+    ("target", U_target, rf"Target $|{U_D}|$"),
     ("lossless", M_lossless, rf"$|M|$, lossless, F = {F_full[0]:.4f}"),
     (
         "overcoupled",

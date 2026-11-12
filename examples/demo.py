@@ -15,8 +15,7 @@ from freq_beamsplitter import (
     plot_matrix_grid,
 )
 
-N_sb = 2   # modes {-2,-1,0,+1,+2}  →  5×5 matrix
-N = 2 * N_sb + 1
+N = 5      # modes {-2,-1,0,+1,+2}  →  5×5 matrix
 N_f  = 4   # number of modulation tones
 
 rng   = np.random.default_rng(42)
