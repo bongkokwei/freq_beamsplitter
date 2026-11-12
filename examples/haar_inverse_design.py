@@ -2,7 +2,8 @@
 examples/haar_inverse_design.py
 ================================
 Demonstrates inverse design of κ_l parameters to implement a target
-unitary (Haar-random, or a Pauli X/Y/Z on the central mode pair) on the
+unitary (Haar-random, DFT / N-dim Hadamard, or a Pauli X/Y/Z on the
+central mode pair) on the
 cascaded ring-resonator platform.
 
 Follows Buddhiraju et al. (2021) — gradient-based (L-BFGS) optimisation
@@ -46,7 +47,7 @@ N = 5  # frequency modes (odd or even)
 N_f = N - 1  # tones per ring: l = 1..N-1 spans every mode separation
 N_r = int(np.ceil(N**2 / (2 * N_f)))  # DOF count: 2·N_r·N_f >= N²
 GAMMA_I = 0.0  # intrinsic loss / gamma_e, used for design AND reconstruction
-TARGET = "haar"  # "haar" | "X" | "Y" | "Z" (Pauli on central pair, identity elsewhere)
+TARGET = "haar"  # "haar" | "dft" (N-dim Hadamard) | "X" | "Y" | "Z" (Pauli on central pair)
 SEED = 7  # reproducible Haar sample
 
 c = N // 2  # centre index: sideband label m = k - c
@@ -55,6 +56,8 @@ c = N // 2  # centre index: sideband label m = k - c
 
 if TARGET == "haar":
     U_target = haar_unitary(N, seed=SEED)
+elif TARGET == "dft":  # F_jk = ω^{jk}/√N, ω = e^{2πi/N}; equals Hadamard at N = 2
+    U_target = np.exp(2j * np.pi * np.outer(np.arange(N), np.arange(N)) / N) / np.sqrt(N)
 elif TARGET in PAULI:
     k = (N - 1) // 2  # central pair (k, k+1); N = 2 -> the Pauli itself
     U_target = embed_unitary_2x2(PAULI[TARGET], k, k + 1, N)
